@@ -1,0 +1,172 @@
+{
+  // ============================================================================
+  // SIMPLEX-DG SOLVER VS CODE CONFIGURATION
+  // Standard IDE settings for consistent development experience across team
+  // ============================================================================
+
+  // ============================================================================
+  // Python Interpreter & Environment
+  // ============================================================================
+  "python.defaultInterpreterPath": "${workspaceFolder}/venv/bin/python",
+  "python.autoComplete.extraPaths": ["${workspaceFolder}/src"],
+  "python.analysis.extraPaths": ["${workspaceFolder}/src"],
+  "python.analysis.exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    ".venv",
+    "build",
+    "dist"
+  ],
+
+  // ============================================================================
+  // Python Formatting (Black)
+  // ============================================================================
+  "python.formatting.provider": "black",
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    },
+    "editor.rulers": [100],
+    "editor.wordWrapColumn": 100
+  },
+
+  // ============================================================================
+  // Import Sorting (isort)
+  // ============================================================================
+  "isort.args": ["--profile=black", "--line-length=100"],
+
+  // ============================================================================
+  // Type Checking (Pylance)
+  // ============================================================================
+  "python.analysis.typeCheckingMode": "basic",
+  "pylance.analysis.typeCheckingMode": "basic",
+  "pylance.symbolsInlineValues": true,
+  "pylance.includeStubPackages": true,
+
+  // ============================================================================
+  // Linting (Flake8)
+  // ============================================================================
+  "python.linting.flake8Enabled": true,
+  "python.linting.flake8Args": [
+    "--max-line-length=100",
+    "--extend-ignore=E203,W503,E501"
+  ],
+
+  // ============================================================================
+  // Testing (pytest)
+  // ============================================================================
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestPath": "pytest",
+  "python.testing.pytestArgs": [
+    "tests",
+    "-v",
+    "--tb=short"
+  ],
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
+
+  // ============================================================================
+  // Jupyter Notebook Support
+  // ============================================================================
+  "notebook.kernelPickerType": "mru",
+  "jupyter.experiments.enabled": false,
+  "notebook.lineNumbers": "on",
+
+  // ============================================================================
+  // Editor Preferences
+  // ============================================================================
+  "editor.insertSpaces": true,
+  "editor.tabSize": 4,
+  "editor.trimFinalNewlines": true,
+  "editor.trimAutoWhitespace": true,
+  "editor.renderWhitespace": "selection",
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "ms-python.python",
+
+  // ============================================================================
+  // Files & Encoding
+  // ============================================================================
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.encoding": "utf8",
+  "files.autoSave": "onFocusChange",
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.git": true,
+    "**/.venv": true,
+    "**/.pytest_cache": true,
+    "**/.mypy_cache": true,
+    "outputs": true
+  },
+
+  // ============================================================================
+  // Search Patterns
+  // ============================================================================
+  "search.exclude": {
+    "**/__pycache__": true,
+    "**/.git": true,
+    "**/.venv": true,
+    "outputs": true,
+    "build": true,
+    "dist": true,
+    ".eggs": true
+  },
+  "search.useRipgrep": true,
+
+  // ============================================================================
+  // File Associations
+  // ============================================================================
+  "files.associations": {
+    "*.ipynb": "jupyter",
+    "pyproject.toml": "toml",
+    ".pre-commit-config.yaml": "yaml"
+  },
+
+  // ============================================================================
+  // Markdown & Documentation
+  // ============================================================================
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.rulers": [100],
+    "editor.formatOnSave": false
+  },
+  "markdown.preview.fontSize": 12,
+  "markdown.updateLinksOnFileMove.enabled": "prompt",
+
+  // ============================================================================
+  // YAML Support
+  // ============================================================================
+  "[yaml]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.formatOnSave": false
+  },
+
+  // ============================================================================
+  // Git Integration
+  // ============================================================================
+  "git.autofetch": true,
+  "git.autorefresh": true,
+  "git.ignoreLimitWarning": true,
+
+  // ============================================================================
+  // Terminal
+  // ============================================================================
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.defaultProfile.windows": "pwsh",
+  "terminal.integrated.env.osx": {
+    "PYTHONPATH": "${workspaceFolder}/src"
+  },
+
+  // ============================================================================
+  // Extensions & Telemetry
+  // ============================================================================
+  "telemetry.telemetryLevel": "off",
+  "jupyter.interactiveWindow.creationMode": "single"
+}

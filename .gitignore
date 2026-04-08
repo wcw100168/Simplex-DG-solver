@@ -7,3 +7,5 @@ build/
 *.egg-info/
 .coverage
 htmlcov/
+outputs/
+*.png
