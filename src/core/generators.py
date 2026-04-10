@@ -10,7 +10,7 @@ from .data_structs import Node, get_orbit, bary_to_cartesian_2d, bary_to_cartesi
 class BaseNodeGenerator:
     """
     Abstract base class for node generation strategies.
-    
+
     Parameters:
     -----------
     k : int
@@ -20,7 +20,7 @@ class BaseNodeGenerator:
     vertices_3d : np.ndarray
         3D reference triangle vertices (shape: [3, 3])
     """
-    
+
     def __init__(self, k: int, vertices_2d: np.ndarray, vertices_3d: np.ndarray):
         self.k = int(k)
         self.vertices_2d = np.asarray(vertices_2d, dtype=float)
@@ -34,10 +34,10 @@ class BaseNodeGenerator:
 class Table1NodeGenerator(BaseNodeGenerator):
     """
     Generate quadrature nodes based on Table 1 (exact integration rules).
-    
+
     Supports polynomial degrees k=1,2,3,4.
     """
-    
+
     QUADRATURE_RULES = {
         1: [
             (0.2113248654051871, 0.0000000000000000, 0.16666666666666667)
@@ -65,7 +65,7 @@ class Table1NodeGenerator(BaseNodeGenerator):
     def generate(self):
         """
         Generate nodes from Table 1 data.
-        
+
         Returns:
         --------
         list of Node
@@ -91,10 +91,10 @@ class Table1NodeGenerator(BaseNodeGenerator):
 class Table2NodeGenerator(BaseNodeGenerator):
     """
     Generate quadrature nodes based on Table 2 (interior nodal rules).
-    
+
     Supports polynomial degrees k=1,2,3,4.
     """
-    
+
     QUADRATURE_RULES = {
         1: [(0.1666666666666666, 0.1666666666666666, 0.3333333333333333)],
         2: [
@@ -119,12 +119,12 @@ class Table2NodeGenerator(BaseNodeGenerator):
     def octa_face_map(u: float, v: float, w: float):
         """
         Map from normalized octahedron coordinates to [-1, 1]^3.
-        
+
         Parameters:
         -----------
         u, v, w : float
             Normalized octahedron face coordinates
-        
+
         Returns:
         --------
         np.ndarray
@@ -143,12 +143,12 @@ class Table2NodeGenerator(BaseNodeGenerator):
     def mapped_to_bary(mapped_xyz: np.ndarray):
         """
         Convert mapped coordinates back to barycentric coordinates.
-        
+
         Parameters:
         -----------
         mapped_xyz : np.ndarray
             Coordinates in [-1, 1]^3
-        
+
         Returns:
         --------
         np.ndarray
@@ -161,7 +161,7 @@ class Table2NodeGenerator(BaseNodeGenerator):
     def generate(self):
         """
         Generate nodes from Table 2 data.
-        
+
         Returns:
         --------
         list of Node
@@ -187,7 +187,7 @@ class Table2NodeGenerator(BaseNodeGenerator):
 def build_nodes(method: str, k: int, vertices_2d: np.ndarray, vertices_3d: np.ndarray):
     """
     Factory function to build nodes using the specified method.
-    
+
     Parameters:
     -----------
     method : str
@@ -198,7 +198,7 @@ def build_nodes(method: str, k: int, vertices_2d: np.ndarray, vertices_3d: np.nd
         2D reference triangle vertices (shape: [3, 2])
     vertices_3d : np.ndarray
         3D reference triangle vertices (shape: [3, 3])
-    
+
     Returns:
     --------
     list of Node
@@ -217,16 +217,16 @@ def build_nodes(method: str, k: int, vertices_2d: np.ndarray, vertices_3d: np.nd
 def get_extra_bary(method: str, k: int):
     """
     Generate additional barycentric points for boundary/symmetry correction.
-    
+
     Injects symmetric corrective points based on the method and degree.
-    
+
     Parameters:
     -----------
     method : str
         Either "table1" or "table2"
     k : int
         Polynomial degree
-    
+
     Returns:
     --------
     np.ndarray
@@ -245,3 +245,110 @@ def get_extra_bary(method: str, k: int):
             extra.extend(get_orbit(11 / 24, 11 / 24))
 
     return np.array(extra, dtype=float) if extra else np.empty((0, 3), dtype=float)
+
+
+# Reference triangle vertices constants
+# These standard definitions are imported from render_utils to avoid circular imports,
+# but temporarily redefined here for compatibility with get_reference_data API
+_VERTICES_2D = np.array([
+    [0.0, 0.0],
+    [1.0, 0.0],
+    [0.5, np.sqrt(3.0) / 2.0],
+], dtype=float)
+"""Reference equilateral triangle in 2D (barycentric → Cartesian)"""
+
+_VERTICES_3D = np.array([
+    [1.0, 0.0, 0.0],
+    [0.0, 1.0, 0.0],
+    [0.0, 0.0, 1.0],
+], dtype=float)
+"""Octahedron first-quadrant face in 3D"""
+
+
+def get_reference_data(method: str, k: int) -> dict:
+    """
+    Load reference element quadrature data for DG basis functions.
+
+    Generates quadrature nodes on the reference simplex triangle using either Table 1
+    (exact integration rules) or Table 2 (nodal rules) for polynomial degrees k ∈ {1,2,3,4}.
+    Converts node data to barycentric and physical coordinates with associated quadrature weights.
+
+    **Reference Coordinates:**
+    - Barycentric: $\\lambda = (\\lambda_1, \\lambda_2, \\lambda_3)$ where $\\lambda_i \\in [0,1]$ and $\\sum \\lambda_i = 1$
+    - Physical (r,s): $r = \\lambda_1$, $s = \\lambda_2$, so $(r, s) \\in [0,1]^2$
+
+    Args:
+        method: Quadrature rule method, either 'table1' (exact integration) or 'table2' (nodal points).
+        k: Polynomial degree (1 ≤ k ≤ 4).
+
+    Returns:
+        Dictionary with keys:
+            - 'nodes' (list): Reference nodes with barycentric coords, weights, local coords
+            - 'bary_coords' (np.ndarray): Barycentric coordinates, shape (N_nodes, 3)
+            - 'weights' (np.ndarray): Quadrature weights, shape (N_nodes,)
+            - 'weights_1d' (np.ndarray): 1D boundary quadrature weights for edge integration, shape (nfp,)
+            - 'xi' (np.ndarray): Transformed coordinate xi = 2*λ₃ - 1, shape (N_nodes,)
+            - 'eta' (np.ndarray): Transformed coordinate eta = 2*λ₂ - 1, shape (N_nodes,)
+
+    Example:
+        >>> data = get_reference_data('table1', k=3)
+        >>> xi, eta, w = data['xi'], data['eta'], data['weights']
+        >>> w_1d = data['weights_1d']  # 1D boundary weights (4 points for k=3)
+        >>> N_nodes = len(xi)
+        >>> # Use for DG basis evaluation: Φ(xi,eta) on reference simplex
+
+    Reference:
+        Cockburn, Karniadakis, Shu (2000): \"Runge-Kutta Discontinuous Galerkin Methods\"
+        Dubiner: \"Spectral Methods on Triangles and Other Domains\", J. Sci. Comput. (1991)
+    """
+    nodes = build_nodes(method, k, _VERTICES_2D, _VERTICES_3D)
+    bary_coords = np.array([n.barycentric for n in nodes], dtype=float)
+    weights = np.array([n.weight for n in nodes], dtype=float)
+    xi = 2.0 * bary_coords[:, 2] - 1.0
+    eta = 2.0 * bary_coords[:, 1] - 1.0
+
+    # ========================================================================
+    # Hardcoded 1D boundary quadrature weights (Gauss-Legendre on [-1, 1])
+    # ========================================================================
+    # These weights are for 1D edge integration in Surface term computation
+    # The number of points per face (nfp) = k + 1, and these are standard GL weights
+
+    if method.lower().strip() == 'table1':
+        if k == 1:
+            # 2-point Gauss-Legendre (k=1 → 2 pts/face)
+            w_1d = np.array([1.0, 1.0])
+        elif k == 2:
+            # 3-point Gauss-Legendre (k=2 → 3 pts/face)
+            w_1d = np.array([0.555555555555556, 0.888888888888889, 0.555555555555556])
+        elif k == 3:
+            # 4-point Gauss-Legendre (k=3 → 4 pts/face)
+            w_1d = np.array([0.347854845137454, 0.652145154862546, 0.652145154862546, 0.347854845137454])
+        elif k == 4:
+            # 5-point Gauss-Legendre (k=4 → 5 pts/face)
+            w_1d = np.array([0.236926885056189, 0.478628670499366, 0.568888888888889,
+                            0.478628670499366, 0.236926885056189])
+        else:
+            raise ValueError(f"1D boundary weights not defined for k={k}")
+    elif method.lower().strip() == 'table2':
+        if k == 1:
+            w_1d = np.array([1.0, 1.0])
+        elif k == 2:
+            w_1d = np.array([0.555555555555556, 0.888888888888889, 0.555555555555556])
+        elif k == 3:
+            w_1d = np.array([0.347854845137454, 0.652145154862546, 0.652145154862546, 0.347854845137454])
+        elif k == 4:
+            w_1d = np.array([0.236926885056189, 0.478628670499366, 0.568888888888889,
+                            0.478628670499366, 0.236926885056189])
+        else:
+            raise ValueError(f"1D boundary weights not defined for k={k}")
+    else:
+        raise ValueError(f"Unknown method: {method}")
+
+    return {
+        "nodes": nodes,
+        "bary_coords": bary_coords,
+        "weights": weights,
+        "weights_1d": w_1d,
+        "xi": xi,
+        "eta": eta,
+    }
