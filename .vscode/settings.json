@@ -168,5 +168,9 @@
   // Extensions & Telemetry
   // ============================================================================
   "telemetry.telemetryLevel": "off",
-  "jupyter.interactiveWindow.creationMode": "single"
+  "jupyter.interactiveWindow.creationMode": "single",
+  "chat.tools.terminal.autoApprove": {
+    "jupyter": true,
+    "timeout": true
+  }
 }
