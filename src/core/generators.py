@@ -308,37 +308,25 @@ def get_reference_data(method: str, k: int) -> dict:
     eta = 2.0 * bary_coords[:, 1] - 1.0
 
     # ========================================================================
-    # Hardcoded 1D boundary quadrature weights (Gauss-Legendre on [-1, 1])
+    # Hardcoded 1D boundary quadrature weights (Matching Table 1 from PDF)
     # ========================================================================
     # These weights are for 1D edge integration in Surface term computation
-    # The number of points per face (nfp) = k + 1, and these are standard GL weights
+    # The number of points per face (nfp) = k + 1, sum of weights = 1.0
 
-    if method.lower().strip() == 'table1':
+    if method.lower().strip() in ['table1', 'table2']:
         if k == 1:
             # 2-point Gauss-Legendre (k=1 → 2 pts/face)
-            w_1d = np.array([1.0, 1.0])
+            w_1d = np.array([0.5000000000000000, 0.5000000000000000])
         elif k == 2:
             # 3-point Gauss-Legendre (k=2 → 3 pts/face)
-            w_1d = np.array([0.555555555555556, 0.888888888888889, 0.555555555555556])
+            w_1d = np.array([0.2777777777777777, 0.4444444444444444, 0.2777777777777777])
         elif k == 3:
             # 4-point Gauss-Legendre (k=3 → 4 pts/face)
-            w_1d = np.array([0.347854845137454, 0.652145154862546, 0.652145154862546, 0.347854845137454])
+            w_1d = np.array([0.1739274225687269, 0.3260725774312731, 0.3260725774312731, 0.1739274225687269])
         elif k == 4:
             # 5-point Gauss-Legendre (k=4 → 5 pts/face)
-            w_1d = np.array([0.236926885056189, 0.478628670499366, 0.568888888888889,
-                            0.478628670499366, 0.236926885056189])
-        else:
-            raise ValueError(f"1D boundary weights not defined for k={k}")
-    elif method.lower().strip() == 'table2':
-        if k == 1:
-            w_1d = np.array([1.0, 1.0])
-        elif k == 2:
-            w_1d = np.array([0.555555555555556, 0.888888888888889, 0.555555555555556])
-        elif k == 3:
-            w_1d = np.array([0.347854845137454, 0.652145154862546, 0.652145154862546, 0.347854845137454])
-        elif k == 4:
-            w_1d = np.array([0.236926885056189, 0.478628670499366, 0.568888888888889,
-                            0.478628670499366, 0.236926885056189])
+            w_1d = np.array([0.1184634425280944, 0.2393143352496833, 0.2844444444444446,
+                             0.2393143352496833, 0.1184634425280944])
         else:
             raise ValueError(f"1D boundary weights not defined for k={k}")
     else:
